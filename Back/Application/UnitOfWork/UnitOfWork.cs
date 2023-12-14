@@ -30,7 +30,7 @@ public class UnitOfWork : IUnitOfWork, IDisposable
         }
     }
 
-    public IRol Rols
+    public IRol Roles
     {
         get
         {

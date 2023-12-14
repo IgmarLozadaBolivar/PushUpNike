@@ -3,7 +3,7 @@ namespace Domain.Interfaces;
 public interface IUnitOfWork
 {
     IUser Users { get; }
-    IRol Rols { get; }
+    IRol Roles { get; }
 
     ICliente Clientes { get; }
     ICategoria Categorias { get; }
