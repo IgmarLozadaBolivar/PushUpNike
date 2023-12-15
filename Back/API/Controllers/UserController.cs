@@ -17,8 +17,9 @@ public class UserController : BaseApiController
     private readonly IUnitOfWork unitOfWork;
     private readonly IMapper mapper;
 
-    public UserController(IUnitOfWork unitOfWork, IMapper mapper)
+    public UserController(IUserService userService, IUnitOfWork unitOfWork, IMapper mapper)
     {
+        _userservice = userService;
         this.unitOfWork = unitOfWork;
         this.mapper = mapper;
     }
@@ -62,7 +63,6 @@ public class UserController : BaseApiController
     }
 
     [HttpPost("register")]
-    [Authorize(Roles = "Administrador")]
     public async Task<ActionResult> RegisterAsync(RegisterDto model)
     {
         var result = await _userservice.RegisterAsync(model);

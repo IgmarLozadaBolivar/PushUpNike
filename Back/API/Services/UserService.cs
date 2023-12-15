@@ -34,14 +34,14 @@ public class UserService : IUserService
         user.Password = _passwordHasher.HashPassword(user, registerDto.Password);
 
         var existingUser = _unitOfWork.Users
-                                .Find(u => u.Nombre.ToLower() == registerDto.Nombre.ToLower())
-                                .FirstOrDefault();
+                                    .Find(u => u.Nombre.ToLower() == registerDto.Nombre.ToLower())
+                                    .FirstOrDefault();
 
         if (existingUser == null)
         {
             var rolDefault = _unitOfWork.Roles
-                                .Find(u => u.Nombre == Authorization.rol_default.ToString())
-                                .First();
+                                    .Find(u => u.Nombre == Authorization.rol_default.ToString())
+                                    .First();
             try
             {
                 user.Rols.Add(rolDefault);
@@ -66,7 +66,7 @@ public class UserService : IUserService
     {
         DataUserDto dataUserDto = new DataUserDto();
         var user = await _unitOfWork.Users
-            .GetByUsernameAsync(model.Nombre);
+                    .GetByUsernameAsync(model.Nombre);
 
         if (user == null)
         {
@@ -84,8 +84,8 @@ public class UserService : IUserService
             dataUserDto.Token = new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken);
             dataUserDto.UserName = user.Nombre;
             dataUserDto.Roles = user.Rols
-                            .Select(u => u.Nombre)
-                            .ToList();
+                                            .Select(u => u.Nombre)
+                                            .ToList();
 
             if (user.RefreshTokens.Any(a => a.IsActive))
             {
@@ -102,6 +102,7 @@ public class UserService : IUserService
                 _unitOfWork.Users.Update(user);
                 await _unitOfWork.SaveAsync();
             }
+
             return dataUserDto;
         }
         dataUserDto.IsAuthenticated = false;
@@ -113,7 +114,7 @@ public class UserService : IUserService
     {
 
         var user = await _unitOfWork.Users
-                            .GetByUsernameAsync(model.Nombre);
+                    .GetByUsernameAsync(model.Nombre);
         if (user == null)
         {
             return $"User {model.Nombre} does not exists.";
@@ -124,8 +125,8 @@ public class UserService : IUserService
         if (result == PasswordVerificationResult.Success)
         {
             var rolExists = _unitOfWork.Roles
-                                .Find(u => u.Nombre.ToLower() == model.Role.ToLower())
-                                .FirstOrDefault();
+                                        .Find(u => u.Nombre.ToLower() == model.Role.ToLower())
+                                        .FirstOrDefault();
 
             if (rolExists != null)
             {
@@ -137,8 +138,10 @@ public class UserService : IUserService
                     _unitOfWork.Users.Update(user);
                     await _unitOfWork.SaveAsync();
                 }
+
                 return $"Role {model.Role} added to user {model.Nombre} successfully.";
             }
+
             return $"Role {model.Role} was not found.";
         }
         return $"Invalid Credentials";
@@ -149,7 +152,7 @@ public class UserService : IUserService
         var dataUserDto = new DataUserDto();
 
         var usuario = await _unitOfWork.Users
-                            .GetByRefreshTokenAsync(refreshToken);
+                        .GetByRefreshTokenAsync(refreshToken);
 
         if (usuario == null)
         {
@@ -178,8 +181,8 @@ public class UserService : IUserService
         dataUserDto.UserName = usuario.Nombre;
         dataUserDto.Email = usuario.Email;
         dataUserDto.Roles = usuario.Rols
-                                .Select(u => u.Nombre)
-                                .ToList();
+                                        .Select(u => u.Nombre)
+                                        .ToList();
         dataUserDto.RefreshToken = newRefreshToken.Token;
         dataUserDto.RefreshTokenExpiration = newRefreshToken.Expires;
         return dataUserDto;
@@ -210,20 +213,20 @@ public class UserService : IUserService
         }
         var claims = new[]
         {
-                new Claim(JwtRegisteredClaimNames.Sub, user.Nombre),
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim(JwtRegisteredClaimNames.Email, user.Email),
-                new Claim("uid", user.Id.ToString())
-            }
+                                new Claim(JwtRegisteredClaimNames.Sub, user.Nombre),
+                                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                                new Claim(JwtRegisteredClaimNames.Email, user.Email),
+                                new Claim("uid", user.Id.ToString())
+                        }
         .Union(roleClaims);
         var symmetricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwt.Key));
         var signingCredentials = new SigningCredentials(symmetricSecurityKey, SecurityAlgorithms.HmacSha256);
         var jwtSecurityToken = new JwtSecurityToken(
-        issuer: _jwt.Issuer,
-        audience: _jwt.Audience,
-        claims: claims,
-        expires: DateTime.UtcNow.AddMinutes(_jwt.DurationInMinutes),
-        signingCredentials: signingCredentials);
+            issuer: _jwt.Issuer,
+            audience: _jwt.Audience,
+            claims: claims,
+            expires: DateTime.UtcNow.AddMinutes(_jwt.DurationInMinutes),
+            signingCredentials: signingCredentials);
         return jwtSecurityToken;
     }
 }
